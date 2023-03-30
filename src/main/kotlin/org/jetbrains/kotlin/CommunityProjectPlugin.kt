@@ -22,8 +22,14 @@ class CommunityProjectPlugin @Inject constructor (
 
     override fun apply(project: Project) {
         project.tasks.withType<KotlinCompilationTask<*>> {
-            compilerOptions.apiVersion.set(kotlinApiVersion.map { KotlinVersion.fromVersion(it) })
-            compilerOptions.languageVersion.set(kotlinLanguageVersion.map { KotlinVersion.fromVersion(it) })
+            if (kotlinApiVersion.isPresent) {
+                compilerOptions.apiVersion.set(kotlinApiVersion.map { KotlinVersion.fromVersion(it) })
+            }
+
+            if (kotlinLanguageVersion.isPresent) {
+                compilerOptions.languageVersion.set(kotlinLanguageVersion.map { KotlinVersion.fromVersion(it) })
+            }
+
             compilerOptions.freeCompilerArgs.add("-version")
 
             doFirst {
