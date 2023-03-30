@@ -17,7 +17,7 @@ settingsEvaluated {
 
         resolutionStrategy {
             eachPlugin {
-                if (requested.id.namespace == "org.jetbrains.kotlin") {
+                if (requested.id.id.startsWith("org.jetbrains.kotlin.")) {
                     useVersion(kotlinVersion)
                 }
             }
