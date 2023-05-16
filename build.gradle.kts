@@ -17,10 +17,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
 }
 
-kotlin {
-    jvmToolchain(8)
-}
-
 publishing {
     repositories {
         maven {
