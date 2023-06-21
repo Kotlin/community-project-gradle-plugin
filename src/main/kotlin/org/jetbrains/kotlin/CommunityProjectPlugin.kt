@@ -6,6 +6,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.CompileUsingKotlinDaemon
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import javax.inject.Inject
 
@@ -39,6 +40,24 @@ class CommunityProjectPlugin @Inject constructor (
                             " languageVersion: ${compilerOptions.languageVersion.orNull?.version}" +
                             " apiVersion: ${compilerOptions.apiVersion.orNull?.version}"
                 )
+            }
+        }
+        project.tasks.withType<CompileUsingKotlinDaemon> {
+            val rootProjectDir = project.rootProject.projectDir.path
+
+            val ourArguments = listOf(
+                "-XX:+HeapDumpOnOutOfMemoryError",
+                "-Dkotlin.daemon.log.path=$rootProjectDir/build",
+                "-XX:HeapDumpPath=$rootProjectDir"
+            )
+            val existingArguments = kotlinDaemonJvmArguments.get().filter { arg ->
+                ourArguments.none { arg.contains(it.substringBefore("=")) }
+            }
+
+            kotlinDaemonJvmArguments.set(ourArguments + existingArguments)
+
+            doFirst {
+                logger.info("kotlinDaemonJvmArguments ${kotlinDaemonJvmArguments.get()}")
             }
         }
     }
