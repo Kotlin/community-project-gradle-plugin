@@ -39,6 +39,12 @@ settingsEvaluated {
         }
     }
 
+    dependencyResolutionManagement {
+        repositories {
+            setupRepositories(kotlinRepo)
+        }
+    }
+
     includeBuild(pluginPath)
 }
 
