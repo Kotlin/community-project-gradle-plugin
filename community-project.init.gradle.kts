@@ -7,6 +7,7 @@ import org.gradle.plugin.management.internal.DefaultPluginRequest
 settingsEvaluated {
     val kotlinVersion = extra["community.project.kotlin.version"].toString()
     val kotlinRepo = extra["community.project.kotlin.repo"].toString()
+
     val pluginPath = if (extra.has("community.project.plugin.build.path")) {
         extra["community.project.plugin.build.path"].toString()
     } else {
@@ -51,6 +52,7 @@ settingsEvaluated {
 allprojects {
     val kotlinVersion = extra["community.project.kotlin.version"].toString()
     val kotlinRepo = extra["community.project.kotlin.repo"].toString()
+    val composeVersion = readComposeVersion()
 
     if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
         buildscript {
@@ -59,7 +61,7 @@ allprojects {
             }
 
             configurations.all {
-                useKotlinVersionResolutionStrategy(kotlinVersion)
+                useKotlinVersionResolutionStrategy(kotlinVersion, composeVersion)
             }
 
             dependencies.add("classpath", "org.jetbrains.kotlin:community-project-plugin")
@@ -76,13 +78,13 @@ allprojects {
         dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
 
         configurations["implementation"].apply {
-            useKotlinVersionResolutionStrategy(kotlinVersion)
+            useKotlinVersionResolutionStrategy(kotlinVersion, composeVersion)
         }
     }
 
     if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
         configurations.all {
-            useKotlinVersionResolutionStrategy(kotlinVersion)
+            useKotlinVersionResolutionStrategy(kotlinVersion, composeVersion)
         }
     }
 }
@@ -93,11 +95,26 @@ afterProject {
     }
 }
 
-fun Configuration.useKotlinVersionResolutionStrategy(version: String) = resolutionStrategy {
+fun Configuration.useKotlinVersionResolutionStrategy(version: String, composeVersion: String?) = resolutionStrategy {
     eachDependency {
         if (requested.group == "org.jetbrains.kotlin") {
             useVersion(version)
+            because("Replace version in Kotlin Community Project Plugin")
         }
+        if (composeVersion != null) {
+            if (requested.group == "androidx.compose.compiler" && requested.name == "compiler") {
+                useTarget("org.jetbrains.kotlin.experimental.compose:compiler:$composeVersion")
+                because("Experimental developer version of compose")
+            }
+        }
+    }
+}
+
+fun org.gradle.api.plugins.ExtensionAware.readComposeVersion(): String? {
+    return if (extra.has("community.project.compose.experimental.version")) {
+        extra["community.project.compose.experimental.version"].toString()
+    } else {
+        null
     }
 }
 

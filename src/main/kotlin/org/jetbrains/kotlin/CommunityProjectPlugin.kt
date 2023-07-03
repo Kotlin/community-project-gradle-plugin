@@ -33,6 +33,11 @@ class CommunityProjectPlugin @Inject constructor (
 
             compilerOptions.freeCompilerArgs.add("-version")
 
+            compilerOptions.freeCompilerArgs.addAll(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
+            )
+
             doFirst {
                 val compilerOptions = (this as KotlinCompilationTask<*>).compilerOptions
                 logger.info(
