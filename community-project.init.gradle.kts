@@ -1,4 +1,8 @@
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 import org.gradle.api.artifacts.Configuration
+import org.gradle.plugin.management.PluginRequest
+import org.gradle.plugin.management.internal.DefaultPluginRequest
 
 settingsEvaluated {
     val kotlinVersion = extra["community.project.kotlin.version"].toString()
@@ -10,6 +14,16 @@ settingsEvaluated {
             .single { it.name == "community-project.init.gradle.kts" }.parentFile.absolutePath
     }
 
+    fun rewriteOriginalRequestVersion(request: PluginRequest, version: String) {
+        val defaultPluginRequest = request as DefaultPluginRequest
+        val originalRequest = defaultPluginRequest.originalRequest as DefaultPluginRequest
+
+        val versionField = DefaultPluginRequest::class.java.getDeclaredField("version")
+        versionField.isAccessible = true
+
+        versionField.set(originalRequest, version)
+    }
+
     pluginManagement {
         repositories {
             setupRepositories(kotlinRepo)
@@ -18,6 +32,7 @@ settingsEvaluated {
         resolutionStrategy {
             eachPlugin {
                 if (requested.id.id.startsWith("org.jetbrains.kotlin.")) {
+                    rewriteOriginalRequestVersion(requested, kotlinVersion)
                     useVersion(kotlinVersion)
                 }
             }
