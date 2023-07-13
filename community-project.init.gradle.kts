@@ -102,7 +102,11 @@ fun Configuration.useKotlinVersionResolutionStrategy(version: String) = resoluti
 }
 
 fun RepositoryHandler.setupRepositories(kotlinRepo: String) {
-    maven(kotlinRepo)
+    if (kotlinRepo == "mavenLocal") {
+        mavenLocal()
+    } else {
+        maven(kotlinRepo)
+    }
     mavenCentral()
     gradlePluginPortal()
 }
