@@ -31,8 +31,6 @@ class CommunityProjectPlugin @Inject constructor (
                 compilerOptions.languageVersion.set(kotlinLanguageVersion.map { KotlinVersion.fromVersion(it) })
             }
 
-            compilerOptions.freeCompilerArgs.add("-version")
-
             doFirst {
                 val compilerOptions = (this as KotlinCompilationTask<*>).compilerOptions
                 logger.info(
