@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.9.0"
     `java-gradle-plugin`
     `kotlin-dsl`
     `maven-publish`
@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     gradleApi()
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
 }
 
 publishing {
