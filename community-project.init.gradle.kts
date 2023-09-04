@@ -1,8 +1,9 @@
 import org.gradle.api.artifacts.Configuration
 
 settingsEvaluated {
-    val kotlinVersion = extra["community.project.kotlin.version"].toString()
-    val kotlinRepo = extra["community.project.kotlin.repo"].toString()
+    val kotlinVersion = extra.getOrNull("community.project.kotlin.version")?.toString()
+    val kotlinRepo = extra.getOrNull("community.project.kotlin.repo")?.toString()
+
     val pluginPath = if (extra.has("community.project.plugin.build.path")) {
         extra["community.project.plugin.build.path"].toString()
     } else {
@@ -15,10 +16,12 @@ settingsEvaluated {
             setupRepositories(kotlinRepo)
         }
 
-        resolutionStrategy {
-            eachPlugin {
-                if (requested.id.id.startsWith("org.jetbrains.kotlin.")) {
-                    useVersion(kotlinVersion)
+        if (kotlinVersion != null) {
+            resolutionStrategy {
+                eachPlugin {
+                    if (requested.id.id.startsWith("org.jetbrains.kotlin.")) {
+                        useVersion(kotlinVersion)
+                    }
                 }
             }
         }
@@ -28,8 +31,8 @@ settingsEvaluated {
 }
 
 allprojects {
-    val kotlinVersion = extra["community.project.kotlin.version"].toString()
-    val kotlinRepo = extra["community.project.kotlin.repo"].toString()
+    val kotlinVersion = extra.getOrNull("community.project.kotlin.version")?.toString()
+    val kotlinRepo = extra.getOrNull("community.project.kotlin.repo")?.toString()
 
     if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
         buildscript {
@@ -37,8 +40,10 @@ allprojects {
                 setupRepositories(kotlinRepo)
             }
 
-            configurations.all {
-                useKotlinVersionResolutionStrategy(kotlinVersion)
+            if (kotlinVersion != null) {
+                configurations.all {
+                    useKotlinVersionResolutionStrategy(kotlinVersion)
+                }
             }
 
             dependencies.add("classpath", "org.jetbrains.kotlin:community-project-plugin")
@@ -52,14 +57,18 @@ allprojects {
 
     if (name == "buildSrc") {
         dependencies.add("implementation", "org.jetbrains.kotlin:community-project-plugin")
-        dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        if (kotlinVersion != null) {
+            dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        }
 
-        configurations["implementation"].apply {
-            useKotlinVersionResolutionStrategy(kotlinVersion)
+        if (kotlinVersion != null) {
+            configurations["implementation"].apply {
+                useKotlinVersionResolutionStrategy(kotlinVersion)
+            }
         }
     }
 
-    if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
+    if (kotlinVersion != null && rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
         configurations.all {
             useKotlinVersionResolutionStrategy(kotlinVersion)
         }
@@ -80,8 +89,19 @@ fun Configuration.useKotlinVersionResolutionStrategy(version: String) = resoluti
     }
 }
 
-fun RepositoryHandler.setupRepositories(kotlinRepo: String) {
-    maven(kotlinRepo)
+fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
+    if (kotlinRepo != null) {
+        maven(kotlinRepo)
+    }
+
     mavenCentral()
     gradlePluginPortal()
+}
+
+fun ExtraPropertiesExtension.getOrNull(propertyName: String): Any? {
+    return if (has(propertyName)) {
+        get(propertyName)
+    } else {
+        null
+    }
 }
