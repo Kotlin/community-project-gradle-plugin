@@ -1,8 +1,8 @@
 import org.gradle.api.artifacts.Configuration
 
 settingsEvaluated {
-    val kotlinVersion = extra.getOrNull("community.project.kotlin.version")?.toString()
-    val kotlinRepo = extra.getOrNull("community.project.kotlin.repo")?.toString()
+    val kotlinVersion = extra.getStringOrNull("community.project.kotlin.version")
+    val kotlinRepo = extra.getStringOrNull("community.project.kotlin.repo")
 
     val pluginPath = if (extra.has("community.project.plugin.build.path")) {
         extra["community.project.plugin.build.path"].toString()
@@ -30,7 +30,7 @@ settingsEvaluated {
     includeBuild(pluginPath)
 
     val disableVerificationTasks =
-        extra.getOrNull("community.project.disable.verification.tasks")?.toString()?.toBoolean() ?: false
+        extra.getStringOrNull("community.project.disable.verification.tasks")?.toBoolean() ?: false
 
     if (disableVerificationTasks) {
         logger.info("Verification tasks are disabled because `community.project.disable.verification.tasks` is true")
@@ -46,8 +46,8 @@ settingsEvaluated {
 }
 
 allprojects {
-    val kotlinVersion = extra.getOrNull("community.project.kotlin.version")?.toString()
-    val kotlinRepo = extra.getOrNull("community.project.kotlin.repo")?.toString()
+    val kotlinVersion = extra.getStringOrNull("community.project.kotlin.version")
+    val kotlinRepo = extra.getStringOrNull("community.project.kotlin.repo")
 
     if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
         buildscript {
@@ -113,9 +113,9 @@ fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
     gradlePluginPortal()
 }
 
-fun ExtraPropertiesExtension.getOrNull(propertyName: String): Any? {
+fun ExtraPropertiesExtension.getStringOrNull(propertyName: String): String? {
     return if (has(propertyName)) {
-        get(propertyName)
+        get(propertyName) as String
     } else {
         null
     }
