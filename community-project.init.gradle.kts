@@ -28,6 +28,21 @@ settingsEvaluated {
     }
 
     includeBuild(pluginPath)
+
+    val disableVerificationTasks =
+        extra.getOrNull("community.project.disable.verification.tasks")?.toString()?.toBoolean() ?: false
+
+    if (disableVerificationTasks) {
+        logger.info("Verification tasks are disabled because `community.project.disable.verification.tasks` is true")
+        gradle.taskGraph.whenReady {
+            allTasks.forEach {
+                if (it is VerificationTask) {
+                    logger.info("Task ${it.path} is disabled because `community.project.disable.verification.tasks` is true")
+                    it.enabled = false
+                }
+            }
+        }
+    }
 }
 
 allprojects {
