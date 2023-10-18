@@ -1,19 +1,22 @@
 import org.gradle.api.artifacts.Configuration
 
-var excludeDependenciesNameContains: String? = null
-var gradleRepositoriesMode: String? = null
+var ignoreDependencyNames: List<String> = listOf()
+var gradleRepositoriesMode: String = "project"
 
-settingsEvaluated {
-    val kotlinVersion = extra.getStringOrNull("community.project.kotlin.version")
-    val kotlinRepo = extra.getStringOrNull("community.project.kotlin.repo")
-
-    excludeDependenciesNameContains = extra.getStringOrNull("community.project.exclude.dependencies.name.contains")
+fun Settings.initEnvironment() {
+    ignoreDependencyNames = extra.getStringOrNull("community.project.ignore.dependencies.names")?.split(",")?.map { it.trim() }?:listOf()
     gradleRepositoriesMode = extra.getStringOrNull("community.project.gradle.repositories.mode")?.also { value ->
         val allowedValues = listOf("project", "settings")
         if(allowedValues.none { it == value })
             throw IllegalArgumentException("The 'community.project.gradle.repositories.mode' parameter can be set " +
                     "to one of the following values: $allowedValues")
     }?: "project"
+}
+
+settingsEvaluated {
+    initEnvironment()
+    val kotlinVersion = extra.getStringOrNull("community.project.kotlin.version")
+    val kotlinRepo = extra.getStringOrNull("community.project.kotlin.repo")
 
     val pluginPath = if (extra.has("community.project.plugin.build.path")) {
         extra["community.project.plugin.build.path"].toString()
@@ -127,11 +130,7 @@ fun Configuration.useKotlinVersionResolutionStrategy(version: String) = resoluti
 }
 
 fun DependencyResolveDetails.isExcludedDependency(): Boolean {
-    return excludeDependenciesNameContains
-        ?.split(",")
-        ?.map { it.trim() }
-        ?.any { this.requested.name.contains(it) }
-        ?: false
+    return ignoreDependencyNames.any { this.requested.name == it }
 }
 
 fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
