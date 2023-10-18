@@ -1,14 +1,34 @@
 import org.gradle.api.artifacts.Configuration
 
+var excludeDependenciesNameContains: String? = null
+var gradleRepositoriesMode: String? = null
+
 settingsEvaluated {
     val kotlinVersion = extra.getStringOrNull("community.project.kotlin.version")
     val kotlinRepo = extra.getStringOrNull("community.project.kotlin.repo")
+
+    excludeDependenciesNameContains = extra.getStringOrNull("community.project.exclude.dependencies.name.contains")
+    gradleRepositoriesMode = extra.getStringOrNull("community.project.gradle.repositories.mode")?.also { value ->
+        val allowedValues = listOf("project", "settings")
+        if(allowedValues.none { it == value })
+            throw IllegalArgumentException("The 'community.project.gradle.repositories.mode' parameter can be set " +
+                    "to one of the following values: $allowedValues")
+    }?: "project"
 
     val pluginPath = if (extra.has("community.project.plugin.build.path")) {
         extra["community.project.plugin.build.path"].toString()
     } else {
         gradle.startParameter.initScripts
             .single { it.name == "community-project.init.gradle.kts" }.parentFile.absolutePath
+    }
+
+    if(gradleRepositoriesMode == "settings") {
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+            repositories {
+                setupRepositories(kotlinRepo)
+            }
+        }
     }
 
     pluginManagement {
@@ -66,8 +86,10 @@ allprojects {
         }
     }
 
-    repositories {
-        setupRepositories(kotlinRepo)
+    if(gradleRepositoriesMode == "project") {
+        repositories {
+            setupRepositories(kotlinRepo)
+        }
     }
 
     if (name == "buildSrc") {
@@ -98,10 +120,18 @@ afterProject {
 
 fun Configuration.useKotlinVersionResolutionStrategy(version: String) = resolutionStrategy {
     eachDependency {
-        if (requested.group == "org.jetbrains.kotlin") {
+        if (requested.group == "org.jetbrains.kotlin" && !isExcludedDependency()) {
             useVersion(version)
         }
     }
+}
+
+fun DependencyResolveDetails.isExcludedDependency(): Boolean {
+    return excludeDependenciesNameContains
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.any { this.requested.name.contains(it) }
+        ?: false
 }
 
 fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
@@ -109,6 +139,7 @@ fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
         maven(kotlinRepo)
     }
 
+    google()
     mavenCentral()
     gradlePluginPortal()
 }

@@ -16,3 +16,4 @@ Sample usage:
 ```
 
 `community.project.plugin.build.path` optional property can be used to specify path to the directory containing plugin build. Defaults to the directory containing `community-project.init.gradle.kts`. 
+`community.project.gradle.repositories.mode` optional property can be used to specify repository mode. Set the value to `settings` if the repositories in the project are defined in the section `dependencyResolutionManagement { repositories { } }` . Default value `project`. More information [here](https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:centralized-repository-declaration) 
