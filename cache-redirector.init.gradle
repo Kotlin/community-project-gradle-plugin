@@ -1,0 +1,18 @@
+gradle.projectsEvaluated {
+    rootProject.with {
+        it.extensions.findByName("kotlinYarn")?.with { ext ->
+            println("cache-redirector init - set kotlinYarn downloadBaseUrl")
+            ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
+        }
+        it.extensions.findByName("kotlinNodeJs")?.with { ext ->
+            println("cache-redirector init - set kotlinNodeJs nodeDownloadBaseUrl")
+            ext.nodeDownloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+        }
+    }
+    allprojects {
+        extensions.findByName("node")?.with { ext ->
+            println("cache-redirector init - set GH node distBaseUrl")
+            ext.distBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+        }
+    }
+}
