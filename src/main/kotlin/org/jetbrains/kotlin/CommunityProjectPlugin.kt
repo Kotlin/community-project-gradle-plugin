@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.tasks.CompileUsingKotlinDaemon
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import javax.inject.Inject
@@ -24,15 +24,13 @@ class CommunityProjectPlugin @Inject constructor (
     override fun apply(project: Project) {
         project.tasks.withType<KotlinCompilationTask<*>> {
             if (kotlinApiVersion.isPresent) {
-                compilerOptions.apiVersion.set(kotlinApiVersion.map { KotlinVersion.fromVersion(it) })
+                compilerOptions.apiVersion.convention(kotlinApiVersion.map { KotlinVersion.fromVersion(it) })
             }
 
             if (kotlinLanguageVersion.isPresent) {
-                compilerOptions.languageVersion.set(kotlinLanguageVersion.map { KotlinVersion.fromVersion(it) })
+                compilerOptions.languageVersion.convention(kotlinLanguageVersion.map { KotlinVersion.fromVersion(it) })
             }
-
             doFirst {
-                val compilerOptions = (this as KotlinCompilationTask<*>).compilerOptions
                 logger.info(
                     "compilerOptions" +
                             " languageVersion: ${compilerOptions.languageVersion.orNull?.version}" +
