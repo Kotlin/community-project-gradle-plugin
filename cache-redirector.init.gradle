@@ -5,14 +5,24 @@ gradle.projectsEvaluated {
             ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
         }
         it.extensions.findByName("kotlinNodeJs")?.with { ext ->
-            println("cache-redirector init - set kotlinNodeJs nodeDownloadBaseUrl")
-            ext.nodeDownloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+            if (ext.nodeDownloadBaseUrl.endsWith("/download/v8-canary")) {
+                println("cache-redirector init - set kotlinNodeJs nodeDownloadBaseUrl canary")
+                ext.nodeDownloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/download/v8-canary"
+            } else {
+                println("cache-redirector init - set kotlinNodeJs nodeDownloadBaseUrl")
+                ext.nodeDownloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+            }
         }
     }
     allprojects {
         extensions.findByName("node")?.with { ext ->
-            println("cache-redirector init - set GH node distBaseUrl")
-            ext.distBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+            if (ext.distBaseUrl.get().endsWith("/download/v8-canary")) {
+                println("cache-redirector init - set GH node distBaseUrl canary")
+                ext.distBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/download/v8-canary"
+            } else {
+                println("cache-redirector init - set GH node distBaseUrl")
+                ext.distBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+            }
         }
     }
 }
