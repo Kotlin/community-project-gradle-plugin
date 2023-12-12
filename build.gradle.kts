@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     gradleApi()
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
 }
 
 publishing {
