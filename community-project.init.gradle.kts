@@ -4,13 +4,16 @@ var ignoreDependencyNames: List<String> = listOf()
 var gradleRepositoriesMode: String = "project"
 
 fun Settings.initEnvironment() {
-    ignoreDependencyNames = extra.getStringOrNull("community.project.ignore.dependencies.names")?.split(",")?.map { it.trim() }?:listOf()
+    ignoreDependencyNames =
+        extra.getStringOrNull("community.project.ignore.dependencies.names")?.split(",")?.map { it.trim() } ?: listOf()
     gradleRepositoriesMode = extra.getStringOrNull("community.project.gradle.repositories.mode")?.also { value ->
         val allowedValues = listOf("project", "settings")
-        if(allowedValues.none { it == value })
-            throw IllegalArgumentException("The 'community.project.gradle.repositories.mode' parameter can be set " +
-                    "to one of the following values: $allowedValues")
-    }?: "project"
+        if (allowedValues.none { it == value })
+            throw IllegalArgumentException(
+                "The 'community.project.gradle.repositories.mode' parameter can be set " +
+                        "to one of the following values: $allowedValues"
+            )
+    } ?: "project"
 }
 
 settingsEvaluated {
@@ -25,7 +28,7 @@ settingsEvaluated {
             .single { it.name == "community-project.init.gradle.kts" }.parentFile.absolutePath
     }
 
-    if(gradleRepositoriesMode == "settings") {
+    if (gradleRepositoriesMode == "settings") {
         dependencyResolutionManagement {
             repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
             repositories {
@@ -89,7 +92,7 @@ allprojects {
         }
     }
 
-    if(gradleRepositoriesMode == "project") {
+    if (gradleRepositoriesMode == "project") {
         repositories {
             setupRepositories(kotlinRepo)
         }
