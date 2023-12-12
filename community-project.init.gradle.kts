@@ -85,10 +85,10 @@ allprojects {
                 configurations.all {
                     useKotlinVersionResolutionStrategy(kotlinVersion)
                 }
+                dependencies.add("classpath", "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
             }
 
             dependencies.add("classpath", "org.jetbrains.kotlin:community-project-plugin")
-            dependencies.add("classpath", "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         }
     }
 
