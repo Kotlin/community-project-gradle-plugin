@@ -16,7 +16,7 @@ gradle.projectsEvaluated {
     }
     allprojects {
         extensions.findByName("node")?.with { ext ->
-            if (ext.distBaseUrl.get().endsWith("/download/v8-canary")) {
+            if (ext.distBaseUrl.isPresent() && ext.distBaseUrl.get().endsWith("/download/v8-canary")) {
                 println("cache-redirector init - set GH node distBaseUrl canary")
                 ext.distBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/download/v8-canary"
             } else {
