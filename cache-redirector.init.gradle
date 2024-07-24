@@ -1,9 +1,4 @@
-beforeSettings { s ->
-    s.apply from: "${file(".").absolutePath}/cache-redirector.settings.gradle.kts"
-}
-
-// Apply cache-redirector to Yarn/NPM
-projectsEvaluated {
+gradle.projectsEvaluated {
     rootProject.with {
         it.extensions.findByName("kotlinYarn")?.with { ext ->
             println("cache-redirector init - set kotlinYarn downloadBaseUrl")
