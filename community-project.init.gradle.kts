@@ -85,6 +85,9 @@ allprojects {
         buildscript {
             repositories {
                 setupRepositories(kotlinRepo)
+                google()
+                mavenCentral()
+                gradlePluginPortal()
             }
 
             if (kotlinVersion != null) {
