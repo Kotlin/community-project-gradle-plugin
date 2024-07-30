@@ -32,20 +32,22 @@ settingsEvaluated {
         dependencyResolutionManagement {
             repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
             repositories {
-                setupRepositories(kotlinRepo)
-                google()
-                mavenCentral()
-                gradlePluginPortal()
+                setupRepositories(kotlinRepo) {
+                    google()
+                    mavenCentral()
+                    gradlePluginPortal()
+                }
             }
         }
     }
 
     pluginManagement {
         repositories {
-            setupRepositories(kotlinRepo)
-            google()
-            mavenCentral()
-            gradlePluginPortal()
+            setupRepositories(kotlinRepo) {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
         }
 
         if (kotlinVersion != null) {
@@ -84,10 +86,11 @@ allprojects {
     if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
         buildscript {
             repositories {
-                setupRepositories(kotlinRepo)
-                google()
-                mavenCentral()
-                gradlePluginPortal()
+                setupRepositories(kotlinRepo) {
+                    google()
+                    mavenCentral()
+                    gradlePluginPortal()
+                }
             }
 
             if (kotlinVersion != null) {
@@ -145,9 +148,10 @@ fun DependencyResolveDetails.isExcludedDependency(): Boolean {
     return ignoreDependencyNames.any { this.requested.name == it }
 }
 
-fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
+fun RepositoryHandler.setupRepositories(kotlinRepo: String?, configure: RepositoryHandler.() -> Unit = {}) {
     if (kotlinRepo != null) {
         maven(kotlinRepo)
+        configure()
     }
 }
 
