@@ -33,6 +33,9 @@ settingsEvaluated {
             repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
             repositories {
                 setupRepositories(kotlinRepo)
+                google()
+                mavenCentral()
+                gradlePluginPortal()
             }
         }
     }
@@ -40,6 +43,9 @@ settingsEvaluated {
     pluginManagement {
         repositories {
             setupRepositories(kotlinRepo)
+            google()
+            mavenCentral()
+            gradlePluginPortal()
         }
 
         if (kotlinVersion != null) {
@@ -140,10 +146,6 @@ fun RepositoryHandler.setupRepositories(kotlinRepo: String?) {
     if (kotlinRepo != null) {
         maven(kotlinRepo)
     }
-
-    google()
-    mavenCentral()
-    gradlePluginPortal()
 }
 
 fun ExtraPropertiesExtension.getStringOrNull(propertyName: String): String? {
