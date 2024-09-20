@@ -8,8 +8,7 @@ val ignoredBuildNames: Set<String> = setOf(
 )
 
 fun Settings.initEnvironment() {
-    ignoreDependencyNames =
-        extra.getStringOrNull("community.project.ignore.dependencies.names")?.split(",")?.map { it.trim() } ?: listOf()
+    ignoreDependencyNames = extra.getStringList("community.project.ignore.dependencies.names")
     gradleRepositoriesMode = extra.getStringOrNull("community.project.gradle.repositories.mode")?.also { value ->
         val allowedValues = listOf("project", "settings")
         if (allowedValues.none { it == value })
@@ -166,5 +165,12 @@ fun ExtraPropertiesExtension.getStringOrNull(propertyName: String): String? {
         null
     }
 }
+
+fun ExtraPropertiesExtension.getStringList(name: String) =
+    getStringOrNull(name)
+        ?.splitToSequence(',')
+        ?.map { it.trim() }
+        ?.toList()
+        .orEmpty()
 
 fun Project.isIgnoredProject() = rootProject.name in ignoredBuildNames
