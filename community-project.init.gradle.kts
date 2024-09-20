@@ -2,6 +2,10 @@ import org.gradle.api.artifacts.Configuration
 
 var ignoreDependencyNames: List<String> = listOf()
 var gradleRepositoriesMode: String = "project"
+val ignoredBuildNames: Set<String> = setOf(
+    "buildSrc",
+    "community-project-plugin",
+)
 
 fun Settings.initEnvironment() {
     ignoreDependencyNames =
@@ -83,7 +87,7 @@ allprojects {
     val kotlinVersion = extra.getStringOrNull("community.project.kotlin.version")
     val kotlinRepo = extra.getStringOrNull("community.project.kotlin.repo")
 
-    if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
+    if (!isIgnoredProject()) {
         buildscript {
             repositories {
                 setupRepositories(kotlinRepo) {
@@ -123,7 +127,7 @@ allprojects {
         }
     }
 
-    if (kotlinVersion != null && rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
+    if (kotlinVersion != null && !isIgnoredProject()) {
         configurations.all {
             useKotlinVersionResolutionStrategy(kotlinVersion)
         }
@@ -131,7 +135,7 @@ allprojects {
 }
 
 afterProject {
-    if (rootProject.name != "buildSrc" && rootProject.name != "community-project-plugin") {
+    if (!isIgnoredProject()) {
         apply(plugin = "org.jetbrains.kotlin.community-project")
     }
 }
@@ -162,3 +166,5 @@ fun ExtraPropertiesExtension.getStringOrNull(propertyName: String): String? {
         null
     }
 }
+
+fun Project.isIgnoredProject() = rootProject.name in ignoredBuildNames
