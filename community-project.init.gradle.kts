@@ -2,7 +2,7 @@ import org.gradle.api.artifacts.Configuration
 
 var ignoreDependencyNames: List<String> = listOf()
 var gradleRepositoriesMode: String = "project"
-val ignoredBuildNames: Set<String> = setOf(
+val ignoredBuildNames: MutableSet<String> = mutableSetOf(
     "buildSrc",
     "community-project-plugin",
 )
@@ -17,6 +17,7 @@ fun Settings.initEnvironment() {
                         "to one of the following values: $allowedValues"
             )
     } ?: "project"
+    ignoredBuildNames.addAll(extra.getStringList("community.project.ignore.builds"))
 }
 
 settingsEvaluated {
