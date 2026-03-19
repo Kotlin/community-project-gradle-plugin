@@ -7,7 +7,7 @@ projectsEvaluated {
     rootProject.with {
         it.extensions.findByName("kotlinYarn")?.with { ext ->
             println("cache-redirector init - set kotlinYarn downloadBaseUrl")
-            ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
+            ext.downloadBaseUrlProperty = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
         }
         it.extensions.findByName("kotlinNodeJs")?.with { ext ->
             if (ext.nodeDownloadBaseUrl.endsWith("/download/v8-canary")) {
