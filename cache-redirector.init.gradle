@@ -5,34 +5,37 @@ beforeSettings { s ->
 // Apply cache-redirector to Yarn/NPM
 projectsEvaluated {
     rootProject.with {
-        it.extensions.findByName("kotlinYarn")?.with { ext ->
-            println("cache-redirector init - set kotlinYarn downloadBaseUrl")
-            try {
-                ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
-            } catch (MissingPropertyException ignored) {
-                // ignore - downloadBaseUrl will be removed in Kotlin 2.4
-                // The replacement is kotlinYarnSpec.downloadBaseUrl
-            }
-        }
         it.extensions.findByName("kotlinYarnSpec")?.with { ext ->
             println("cache-redirector init - set kotlinYarnSpec downloadBaseUrl")
             ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
         }
-        it.extensions.findByName("kotlinNodeJsSpec")?.with { ext ->
-            println("cache-redirector init - set kotlinNodeJsSpec downloadBaseUrl")
-            ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
-        }
-        it.extensions.findByName("kotlinNodeJs")?.with { ext ->
-            if (ext.nodeDownloadBaseUrl.endsWith("/download/v8-canary")) {
-                println("cache-redirector init - set kotlinNodeJs nodeDownloadBaseUrl canary")
-                ext.nodeDownloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/download/v8-canary"
-            } else {
-                println("cache-redirector init - set kotlinNodeJs nodeDownloadBaseUrl")
-                ext.nodeDownloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
-            }
+
+        it.extensions.findByName("kotlinWasmYarnSpec")?.with { ext ->
+            println("cache-redirector init - set kotlinWasmYarnSpec downloadBaseUrl")
+            ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/github.com/yarnpkg/yarn/releases/download"
         }
     }
     allprojects {
+        it.extensions.findByName("kotlinNodeJsSpec")?.with { ext ->
+            if (ext.downloadBaseUrl.endsWith("/download/v8-canary")) {
+                println("cache-redirector init - set kotlinNodeJsSpec downloadBaseUrl canary")
+                ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/download/v8-canary"
+            } else {
+                println("cache-redirector init - set kotlinNodeJsSpec downloadBaseUrl")
+                ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+            }
+        }
+
+        it.extensions.findByName("kotlinWasmNodeJsSpec")?.with { ext ->
+            if (ext.downloadBaseUrl.endsWith("/download/v8-canary")) {
+                println("cache-redirector init - set kotlinWasmNodeJsSpec downloadBaseUrl canary")
+                ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/download/v8-canary"
+            } else {
+                println("cache-redirector init - set kotlinWasmNodeJsSpec downloadBaseUrl")
+                ext.downloadBaseUrl = "https://cache-redirector.jetbrains.com/nodejs.org/dist"
+            }
+        }
+
         extensions.findByName("node")?.with { ext ->
             if (ext.distBaseUrl.isPresent() && ext.distBaseUrl.get().endsWith("/download/v8-canary")) {
                 println("cache-redirector init - set GH node distBaseUrl canary")
