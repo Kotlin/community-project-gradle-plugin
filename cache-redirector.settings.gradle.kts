@@ -177,18 +177,24 @@ val aliases = mapOf(
     "https://repo.maven.apache.org/maven2" to "https://repo1.maven.org/maven2" // Maven Central
 )
 
+// The longest matching origin wins, so more specific entries take precedence regardless of their order in the map
+val sortedCacheMap: List<Pair<String, String>> = cacheMap.entries
+    .map { (origin, cacheUrl) -> origin.trimEnd('/') to cacheUrl.trimEnd('/') }
+    .sortedByDescending { (origin, _) -> origin.length }
+
+fun String.isUnder(prefix: String) = this == prefix || startsWith("$prefix/")
+
+fun String.replacePrefix(prefix: String, replacement: String) = replacement + removePrefix(prefix)
+
 fun URI.maybeRedirect(): URI {
     val url = toString().trimEnd('/')
-    val deAliasedUrl = aliases.getOrDefault(url, url)
+    val deAliasedUrl = aliases.entries
+        .find { (alias, _) -> url.isUnder(alias) }
+        ?.let { (alias, origin) -> url.replacePrefix(alias, origin) }
+        ?: url
 
-    val cacheUrlEntry = cacheMap.entries.find { (origin, _) -> deAliasedUrl.startsWith(origin) }
-    return if (cacheUrlEntry != null) {
-        val cacheUrl = cacheUrlEntry.value
-        val originRestPath = deAliasedUrl.substringAfter(cacheUrlEntry.key, "")
-        URI("$cacheUrl$originRestPath")
-    } else {
-        this
-    }
+    val (origin, cacheUrl) = sortedCacheMap.find { (origin, _) -> deAliasedUrl.isUnder(origin) } ?: return this
+    return URI(deAliasedUrl.replacePrefix(origin, cacheUrl))
 }
 
 fun RepositoryHandler.redirect() = configureEach {
@@ -214,6 +220,21 @@ logger.warn("Redirecting repositories for settings in ${settingsDir.absolutePath
 
 pluginManagement.repositories.redirect()
 buildscript.repositories.redirect()
+
+if (GradleVersion.current() >= GradleVersion.version("6.8")) {
+    @Suppress("UnstableApiUsage")
+    dependencyResolutionManagement.repositories.redirect()
+}
+
+// Without declared plugin repositories Gradle falls back to the implicit Gradle Plugin Portal, which is not
+// a part of the repository container and so cannot be redirected. Declare it explicitly to make it redirectable.
+// Note: plugins from the `plugins {}` block of settings scripts are already resolved by this time.
+gradle.settingsEvaluated {
+    if (pluginManagement.repositories.isEmpty()) {
+        logger.info("Adding the Gradle Plugin Portal to plugin repositories to redirect it")
+        pluginManagement.repositories.gradlePluginPortal()
+    }
+}
 
 gradle.beforeProject {
     buildscript.repositories.redirect()
