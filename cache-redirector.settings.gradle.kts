@@ -214,6 +214,7 @@ logger.warn("Redirecting repositories for settings in ${settingsDir.absolutePath
 
 pluginManagement.repositories.redirect()
 buildscript.repositories.redirect()
+dependencyResolutionManagement.repositories.redirect()
 
 gradle.beforeProject {
     buildscript.repositories.redirect()
